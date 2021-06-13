@@ -11,7 +11,7 @@ require("../lib/swisscalc.display.memoryDisplay.js");
 require("../lib/swisscalc.calc.calculator.js");
 
 import React from "react";
-import { View, PanResponder, StyleSheet, Text, Button, TouchableOpacity, TouchableHighlightBase} from 'react-native';
+import { View, PanResponder, StyleSheet, Text, Button, TouchableOpacity, Image} from 'react-native';
 // for locally stored data
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CalcButton, CalcDisplay } from './../components';
@@ -51,7 +51,8 @@ export default class CalculatorScreen extends React.Component {
       colour_bg: 'black', // for the background
       font_colour: 'white',
       // for custom colour
-      isDialogVisible: false
+      isDialogVisible: false,
+      loading: NOT_DONE
     }
 
     // initialise calculator
@@ -294,114 +295,128 @@ export default class CalculatorScreen extends React.Component {
     this.firstStartUpOver(SETUP_KEY, false);
   }
   componentDidMount() {
+    // timeout to allow loadAsyncData to finish async request
+    setTimeout(() => {this.setState({loading: DONE})}, 500);
     this.loadAsyncData();
   }
 
+
+
   render() {
-    if (this.state.firstStart && !this.state.custom) {
+    if (!this.state.loading) {
       return (
-        <View style={[styles.container, {justifyContent: 'center'}]}> 
-          <Text style={{color: 'white', textAlign: 'center', fontSize: 30}}>This is your first startup. Please complete the setup.</Text>
-          <TouchableOpacity style={{marginBottom: 10}}>
-            <Button title="Custom" onPress={() => this.customSetup()}> </Button>
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Button title="Default" onPress={() => this.loadDefaultAndGoToNext()}> </Button>
-          </TouchableOpacity>
-        </View>);
-    } if (this.state.custom && this.state.firstStart) {
-      return (
-        <View style={[styles.container, {justifyContent: 'center', backgroundColor: this.state.colour_bg}]}>
-          <View>
-            <DialogInput isDialogVisible={this.state.isDialogVisible}
-              title={"Custom colour"}
-              message={"What colour do you want? (provide HEX codes with # for better accuracy"}
-              submitInput={ (inputText) => {this.handleConfirm(inputText)} }
-              closeDialog={ () => {this.handleCancel()}}>
-            </DialogInput>
-          </View>
-          <View style={[styles.buttonRow, {marginBottom: 20}]}>
-            <CalcButton title="C" backgroundColor={this.state.colour_one} color={this.state.font_colour}/>
-            <CalcButton title="7" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
-            <CalcButton title="x" backgroundColor={this.state.colour_three} color={this.state.font_colour}/>
-          </View>
-          <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-            <TouchableOpacity style={[styles.colourPicker, {backgroundColor: 'red', marginRight: 1}]} onPress={() => this.pick('red')}>
-              <Text style={styles.colourPickerText}> Red </Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.colourPicker, {backgroundColor: 'blue', marginRight: 1}]} onPress={() => this.pick('blue')}>
-              <Text style={styles.colourPickerText}> Blue </Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.colourPicker, {backgroundColor: 'green', marginRight: 1}]} onPress={() => this.pick('green')}>
-              <Text style={styles.colourPickerText}> Green </Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.colourPicker, {backgroundColor: 'yellow', marginRight: 1}]} onPress={() => this.pick('yellow')}>
-              <Text style={styles.colourPickerText}> Yellow </Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.colourPicker, {backgroundColor: 'black', marginRight: 1}]} onPress={() => this.pick('black')}>
-              <Text style={styles.colourPickerText}> Black </Text>
-            </TouchableOpacity>
-          </View>
-          <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 20}}>
-            <TouchableOpacity style={[styles.colourPicker, {backgroundColor: 'antiquewhite'}]}> 
-              <Text style={[styles.colourPickerText, {color: 'black'}]} onPress={() => this.setCustom()}> Custom </Text>
-            </TouchableOpacity>
-          </View>
-          <View style={{marginTop: 50, flexDirection: 'row', justifyContent: 'center',}}>
-            <TouchableOpacity style={{backgroundColor: 'antiquewhite', alignItems: 'center', width: 150}} onPress={() => this.firstStartUpOver(SETUP_KEY, false)}> 
-              <Text style={[styles.colourPickerText, {color: 'black'}]}> Confirm </Text>
-            </TouchableOpacity>
-          </View>
-          <View style={{marginTop: 20, flexDirection: 'row', justifyContent: 'center',}}>
-            <TouchableOpacity style={{backgroundColor: 'antiquewhite', alignItems: 'center', width: 150}} onPress={() => this.reset()}> 
-              <Text style={[styles.colourPickerText, {color: 'black'}]}> Reset </Text>
-            </TouchableOpacity>
-          </View>
-          <View style={{marginTop: 20, flexDirection: 'row', justifyContent: 'center',}}>
-            <TouchableOpacity style={{backgroundColor: 'antiquewhite', alignItems: 'center', width: 150}} onPress={() => this.loadDefault()}> 
-              <Text style={[styles.colourPickerText, {color: 'black'}]}> Load Default </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      );
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <Image source={require('../assets/calculator.png')}/>
+      </View>
+        );
     } else {
-      return(
-        <View style={[styles.container, {backgroundColor: this.state.colour_bg}]}>
-          <View style={styles.displayContainer} {...this.panResponder.panHandlers}>
-            <CalcDisplay display={this.state.display}/>
+      if (this.state.firstStart && !this.state.custom) {
+        return (
+          <View style={[styles.container, {justifyContent: 'center'}]}> 
+            <Text style={{color: 'white', textAlign: 'center', fontSize: 30}}>This is your first startup. Please complete the setup.</Text>
+            <TouchableOpacity style={{marginBottom: 10}}>
+              <Button title="Custom" onPress={() => this.customSetup()}> </Button>
+            </TouchableOpacity>
+            <TouchableOpacity>
+              <Button title="Default" onPress={() => this.loadDefaultAndGoToNext()}> </Button>
+            </TouchableOpacity>
+          </View>);
+      } if (this.state.custom && this.state.firstStart) {
+        return (
+          <View style={[styles.container, {justifyContent: 'center', backgroundColor: this.state.colour_bg}]}>
+            <View>
+              <DialogInput isDialogVisible={this.state.isDialogVisible}
+                title={"Custom colour"}
+                message={"What colour do you want? (provide HEX codes with # for better accuracy"}
+                submitInput={ (inputText) => {this.handleConfirm(inputText)} }
+                closeDialog={ () => {this.handleCancel()}}>
+              </DialogInput>
+            </View>
+            <View style={[styles.buttonRow, {marginBottom: 20}]}>
+              <CalcButton title="C" backgroundColor={this.state.colour_one} color={this.state.font_colour}/>
+              <CalcButton title="7" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
+              <CalcButton title="x" backgroundColor={this.state.colour_three} color={this.state.font_colour}/>
+            </View>
+            <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+              <TouchableOpacity style={[styles.colourPicker, {backgroundColor: 'red', marginRight: 1}]} onPress={() => this.pick('red')}>
+                <Text style={styles.colourPickerText}> Red </Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.colourPicker, {backgroundColor: 'blue', marginRight: 1}]} onPress={() => this.pick('blue')}>
+                <Text style={styles.colourPickerText}> Blue </Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.colourPicker, {backgroundColor: 'green', marginRight: 1}]} onPress={() => this.pick('green')}>
+                <Text style={styles.colourPickerText}> Green </Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.colourPicker, {backgroundColor: 'yellow', marginRight: 1}]} onPress={() => this.pick('yellow')}>
+                <Text style={styles.colourPickerText}> Yellow </Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.colourPicker, {backgroundColor: 'black', marginRight: 1}]} onPress={() => this.pick('black')}>
+                <Text style={styles.colourPickerText}> Black </Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 20}}>
+              <TouchableOpacity style={[styles.colourPicker, {backgroundColor: 'antiquewhite'}]}> 
+                <Text style={[styles.colourPickerText, {color: 'black'}]} onPress={() => this.setCustom()}> Custom </Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{marginTop: 50, flexDirection: 'row', justifyContent: 'center',}}>
+              <TouchableOpacity style={{backgroundColor: 'antiquewhite', alignItems: 'center', width: 150}} onPress={() => this.firstStartUpOver(SETUP_KEY, false)}> 
+                <Text style={[styles.colourPickerText, {color: 'black'}]}> Confirm </Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{marginTop: 20, flexDirection: 'row', justifyContent: 'center',}}>
+              <TouchableOpacity style={{backgroundColor: 'antiquewhite', alignItems: 'center', width: 150}} onPress={() => this.reset()}> 
+                <Text style={[styles.colourPickerText, {color: 'black'}]}> Reset </Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{marginTop: 20, flexDirection: 'row', justifyContent: 'center',}}>
+              <TouchableOpacity style={{backgroundColor: 'antiquewhite', alignItems: 'center', width: 150}} onPress={() => this.loadDefault()}> 
+                <Text style={[styles.colourPickerText, {color: 'black'}]}> Load Default </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-          <View style={styles.buttonRow}>
-            <CalcButton onPress={() => this.firstStartUpOver(SETUP_KEY, true)} title="Reset" backgroundColor={this.state.colour_one} color={this.state.font_colour}/>
-            <CalcButton onPress={() => this.onClearPress()} title="C" backgroundColor={this.state.colour_one} color={this.state.font_colour}/>
-            <CalcButton onPress={() => this.onNegatePress()} title="+/-" backgroundColor={this.state.colour_one} color={this.state.font_colour}/>
-            <CalcButton onPress={() => this.addBinaryOperator(this.oc.ModulusOperator)} title="%" backgroundColor={this.state.colour_one} color={this.state.font_colour}/>
-            <CalcButton onPress={() => this.addBinaryOperator(this.oc.DivisionOperator)} title="/" backgroundColor={this.state.colour_three} color={this.state.font_colour}/>
+        );
+      } else {
+        return(
+          <View style={[styles.container, {backgroundColor: this.state.colour_bg}]}>
+            <View style={styles.buttonRow}>
+            <CalcButton style={{ marginTop: 50, flex:4}} onPress={() => this.firstStartUpOver(SETUP_KEY, true)} title="Reset" backgroundColor={this.state.colour_one} color={this.state.font_colour}/>
+            </View>
+            <View style={styles.displayContainer} {...this.panResponder.panHandlers}>
+              <CalcDisplay display={this.state.display}/>
+            </View>
+            <View style={styles.buttonRow}>
+              <CalcButton onPress={() => this.onClearPress()} title="C" backgroundColor={this.state.colour_one} color={this.state.font_colour}/>
+              <CalcButton onPress={() => this.onNegatePress()} title="+/-" backgroundColor={this.state.colour_one} color={this.state.font_colour}/>
+              <CalcButton onPress={() => this.addBinaryOperator(this.oc.ModulusOperator)} title="%" backgroundColor={this.state.colour_one} color={this.state.font_colour}/>
+              <CalcButton onPress={() => this.addBinaryOperator(this.oc.DivisionOperator)} title="/" backgroundColor={this.state.colour_three} color={this.state.font_colour}/>
+            </View>
+            <View style={styles.buttonRow}>
+              <CalcButton onPress={() => this.onDigitPress("7")} title="7" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
+              <CalcButton onPress={() => this.onDigitPress("8")} title="8" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
+              <CalcButton onPress={() => this.onDigitPress("9")} title="9" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
+              <CalcButton onPress={() => this.addBinaryOperator(this.oc.MultiplicationOperator)} title="x" backgroundColor={this.state.colour_three} color={this.state.font_colour}/>
+            </View>
+            <View style={styles.buttonRow}>
+              <CalcButton onPress={() => this.onDigitPress("4")} title="4" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
+              <CalcButton onPress={() => this.onDigitPress("5")} title="5" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
+              <CalcButton onPress={() => this.onDigitPress("6")} title="6" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
+              <CalcButton onPress={() => this.addBinaryOperator(this.oc.SubtractionOperator)} title="-" backgroundColor={this.state.colour_three} color={this.state.font_colour}/>
+            </View>
+            <View style={styles.buttonRow}>
+              <CalcButton onPress={() => this.onDigitPress("1")} title="1" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
+              <CalcButton onPress={() => this.onDigitPress("2")} title="2" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
+              <CalcButton onPress={() => this.onDigitPress("3")} title="3" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
+              <CalcButton onPress={() => this.addBinaryOperator(this.oc.AdditionOperator)} title="+" backgroundColor={this.state.colour_three} color={this.state.font_colour}/>
+            </View>
+            <View style={styles.buttonRow}>
+              <CalcButton onPress={() => this.onDigitPress("0")} title="0" backgroundColor={this.state.colour_two} color={this.state.font_colour} style={{flex: 2}}/>
+              <CalcButton onPress={() => this.onDigitPress(".")} title="." backgroundColor={this.state.colour_three} color={this.state.font_colour} />
+              <CalcButton onPress={() => this.onEquals()} title="=" backgroundColor={this.state.colour_three} color={this.state.font_colour} />
+            </View>
           </View>
-          <View style={styles.buttonRow}>
-            <CalcButton onPress={() => this.onDigitPress("7")} title="7" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
-            <CalcButton onPress={() => this.onDigitPress("8")} title="8" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
-            <CalcButton onPress={() => this.onDigitPress("9")} title="9" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
-            <CalcButton onPress={() => this.addBinaryOperator(this.oc.MultiplicationOperator)} title="x" backgroundColor={this.state.colour_three} color={this.state.font_colour}/>
-          </View>
-          <View style={styles.buttonRow}>
-            <CalcButton onPress={() => this.onDigitPress("4")} title="4" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
-            <CalcButton onPress={() => this.onDigitPress("5")} title="5" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
-            <CalcButton onPress={() => this.onDigitPress("6")} title="6" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
-            <CalcButton onPress={() => this.addBinaryOperator(this.oc.SubtractionOperator)} title="-" backgroundColor={this.state.colour_three} color={this.state.font_colour}/>
-          </View>
-          <View style={styles.buttonRow}>
-            <CalcButton onPress={() => this.onDigitPress("1")} title="1" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
-            <CalcButton onPress={() => this.onDigitPress("2")} title="2" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
-            <CalcButton onPress={() => this.onDigitPress("3")} title="3" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
-            <CalcButton onPress={() => this.addBinaryOperator(this.oc.AdditionOperator)} title="+" backgroundColor={this.state.colour_three} color={this.state.font_colour}/>
-          </View>
-          <View style={styles.buttonRow}>
-            <CalcButton onPress={() => this.onDigitPress("0")} title="0" backgroundColor={this.state.colour_two} color={this.state.font_colour} style={{flex: 2}}/>
-            <CalcButton onPress={() => this.onDigitPress(".")} title="." backgroundColor={this.state.colour_three} color={this.state.font_colour} />
-            <CalcButton onPress={() => this.onEquals()} title="=" backgroundColor={this.state.colour_three} color={this.state.font_colour} />
-          </View>
-        </View>
-      )
+        )
+      }
     }
   }
 };
