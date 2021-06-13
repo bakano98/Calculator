@@ -38,12 +38,6 @@ export default class CalculatorScreen extends React.Component {
       orientation: "portrait",
       firstStart: true,
       custom: false, // set to false after finishing customisation coding
-      // colour picking states
-      first: NOT_DONE,
-      second: NOT_DONE,
-      third: NOT_DONE,
-      font: NOT_DONE,
-      bg: NOT_DONE,
       // default colours
       colour_one: '#00BCD4', // for all the digits
       colour_two: '#03A9F4', // for the operators
@@ -51,7 +45,11 @@ export default class CalculatorScreen extends React.Component {
       colour_bg: 'black', // for the background
       font_colour: 'white',
       // for custom colour
-      isDialogVisible: false,
+      isDialogVisible1: false,
+      isDialogVisible2: false,
+      isDialogVisible3: false,
+      isDialogVisibleFontColour: false,
+      isDialogVisibleBgColour: false,
       loading: NOT_DONE
     }
 
@@ -162,22 +160,6 @@ export default class CalculatorScreen extends React.Component {
     this.setState({custom: true});
   }
 
-  reset = () => {
-    this.setState({
-      first: NOT_DONE,
-      second: NOT_DONE,
-      third: NOT_DONE,
-      font: NOT_DONE,
-      bg: NOT_DONE,
-      // default colours
-      colour_one: '#00BCD4', // for all the digits
-      colour_two: '#03A9F4', // for the operators
-      colour_three: '#607D8B', // for the rest.
-      colour_bg: 'black', // for the background
-      font_colour: 'white',
-    })
-  }
-
   loadDefault = () => {
     this.storeColourOne(COLOUR_KEY_ONE,'#00BCD4');
     this.storeColourTwo(COLOUR_KEY_TWO,'#03A9F4');
@@ -198,7 +180,13 @@ export default class CalculatorScreen extends React.Component {
 
   // for custom colour handling
   handleCancel = () => {
-    this.setState({ isDialogVisible: false})
+    this.setState({ 
+      isDialogVisible1: false,
+      isDialogVisible2: false,
+      isDialogVisible3: false,
+      isDialogVisibleFontColour: false,
+      isDialogVisibleBgColour: false
+    })
   }
 
   // for simple error handling because colours do not take any white space.
@@ -206,41 +194,95 @@ export default class CalculatorScreen extends React.Component {
     return value.indexOf(' ') >= 0;
   }
 
-  pick = (colour) => {
+  pick1 = (colour) => {
     const noWhiteSpace = !this.stringHasTheWhiteSpaceOrNot(colour);
     if (noWhiteSpace) {
-      if (!this.state.first) {
-        this.storeColourOne(COLOUR_KEY_ONE, colour);
-        this.setState({first: DONE});
-      } 
-      else if (!this.state.second) {
-        this.storeColourTwo(COLOUR_KEY_TWO, colour);
-        this.setState({second: DONE});
-      } 
-      else if (!this.state.third) {
-        this.storeColourThree(COLOUR_KEY_THREE, colour);
-        this.setState({third: DONE});
-      } 
-      else if (!this.state.font) {
-        this.storeFontColour(FONT_COLOUR_KEY, colour);
-        this.setState({font: DONE});
-      } 
-      else if (!this.state.bg) {
-        this.storeBGColour(BG_COLOUR_KEY, colour);
-        this.setState({bg: DONE});
-      }
+      this.storeColourOne(COLOUR_KEY_ONE, colour);
+      this.setState({first: DONE});
     } else {
-      // do nothing.
+      // do nothing
     }
   }
-  
-  handleConfirm = (inputText) => {
-    this.pick(inputText)
-    this.setState({ isDialogVisible: false });
+
+  pick2 = (colour) => {
+    const noWhiteSpace = !this.stringHasTheWhiteSpaceOrNot(colour);
+    if (noWhiteSpace) {
+      this.storeColourTwo(COLOUR_KEY_TWO, colour);
+      this.setState({second: DONE});
+    } else {
+      // do nothing
+    }
   }
 
-  setCustom = () => {
-    this.setState({ isDialogVisible: true });
+  pick3 = (colour) => {
+    const noWhiteSpace = !this.stringHasTheWhiteSpaceOrNot(colour);
+    if (noWhiteSpace) {
+      this.storeColourThree(COLOUR_KEY_THREE, colour);
+      this.setState({three: DONE});
+    } else {
+      // do nothing
+    }
+  }
+
+  pickFont = (colour) => {
+    const noWhiteSpace = !this.stringHasTheWhiteSpaceOrNot(colour);
+    if (noWhiteSpace) {
+      this.storeFontColour(FONT_COLOUR_KEY, colour);
+      this.setState({font: DONE});
+    } else {
+      // do nothing
+    }
+  }
+
+  pickBg = (colour) => {
+    const noWhiteSpace = !this.stringHasTheWhiteSpaceOrNot(colour);
+    if (noWhiteSpace) {
+      this.storeBGColour(BG_COLOUR_KEY, colour);
+      this.setState({bg: DONE})
+    } else {
+      // do nothing
+    }
+  }
+
+  // where inputText is the colour given by the user
+  handleConfirm = (inputText) => {
+    // check which dialog is visible...
+    if (this.state.isDialogVisible1) {
+      this.pick1(inputText);
+      this.setState({ isDialogVisible1: false });
+    } else if (this.state.isDialogVisible2) {
+      this.pick2(inputText)
+      this.setState({ isDialogVisible2: false });
+    } else if (this.state.isDialogVisible3) {
+      this.pick3(inputText)
+      this.setState({ isDialogVisible3: false });
+    } else if (this.state.isDialogVisibleFontColour) {
+      this.pickFont(inputText)
+      this.setState({ isDialogVisibleFontColour: false });
+    } else if (this.state.isDialogVisibleBgColour) {
+      this.pickBg(inputText)
+      this.setState({ isDialogVisibleBgColour: false });
+    }
+  }
+
+  setCustom1 = () => {
+    this.setState({ isDialogVisible1: true });
+  }
+
+  setCustom2 = () => {
+    this.setState({ isDialogVisible2: true });
+  }
+
+  setCustom3 = () => {
+    this.setState({ isDialogVisible3: true });
+  }
+
+  setCustomFont = () => {
+    this.setState({ isDialogVisibleFontColour: true });
+  }
+
+  setCustomBg = () => {
+    this.setState({ isDialogVisibleBgColour: true });
   }
 
 
@@ -325,48 +367,63 @@ export default class CalculatorScreen extends React.Component {
         return (
           <View style={[styles.container, {justifyContent: 'center', backgroundColor: this.state.colour_bg}]}>
             <View>
-              <DialogInput isDialogVisible={this.state.isDialogVisible}
-                title={"Custom colour"}
+              <DialogInput isDialogVisible={this.state.isDialogVisible1}
+                title={"Custom button colour"}
+                message={"What colour do you want? (provide HEX codes with # for better accuracy"}
+                submitInput={ (inputText) => {this.handleConfirm(inputText)} }
+                closeDialog={ () => {this.handleCancel()}}>
+              </DialogInput>
+            </View>
+            <View>
+              <DialogInput isDialogVisible={this.state.isDialogVisible2}
+                title={"Custom button colour"}
+                message={"What colour do you want? (provide HEX codes with # for better accuracy"}
+                submitInput={ (inputText) => {this.handleConfirm(inputText)} }
+                closeDialog={ () => {this.handleCancel()}}>
+              </DialogInput>
+            </View>
+            <View>
+              <DialogInput isDialogVisible={this.state.isDialogVisible3}
+                title={"Custom button colour"}
+                message={"What colour do you want? (provide HEX codes with # for better accuracy"}
+                submitInput={ (inputText) => {this.handleConfirm(inputText)} }
+                closeDialog={ () => {this.handleCancel()}}>
+              </DialogInput>
+            </View>
+            <View>
+              <DialogInput isDialogVisible={this.state.isDialogVisibleFontColour}
+                title={"Custom font colour"}
+                message={"What colour do you want? (provide HEX codes with # for better accuracy"}
+                submitInput={ (inputText) => {this.handleConfirm(inputText)} }
+                closeDialog={ () => {this.handleCancel()}}>
+              </DialogInput>
+            </View>
+            <View>
+              <DialogInput isDialogVisible={this.state.isDialogVisibleBgColour}
+                title={"Custom background colour"}
                 message={"What colour do you want? (provide HEX codes with # for better accuracy"}
                 submitInput={ (inputText) => {this.handleConfirm(inputText)} }
                 closeDialog={ () => {this.handleCancel()}}>
               </DialogInput>
             </View>
             <View style={[styles.buttonRow, {marginBottom: 20}]}>
-              <CalcButton title="C" backgroundColor={this.state.colour_one} color={this.state.font_colour}/>
-              <CalcButton title="7" backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
-              <CalcButton title="x" backgroundColor={this.state.colour_three} color={this.state.font_colour}/>
+              <CalcButton title="C" onPress={() => this.setCustom1()} backgroundColor={this.state.colour_one} color={this.state.font_colour}/>
+              <CalcButton title="7" onPress={() => this.setCustom2()} backgroundColor={this.state.colour_two} color={this.state.font_colour}/>
+              <CalcButton title="x" onPress={() => this.setCustom3()} backgroundColor={this.state.colour_three} color={this.state.font_colour}/>
             </View>
-            <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-              <TouchableOpacity style={[styles.colourPicker, {backgroundColor: 'red', marginRight: 1}]} onPress={() => this.pick('red')}>
-                <Text style={styles.colourPickerText}> Red </Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.colourPicker, {backgroundColor: 'blue', marginRight: 1}]} onPress={() => this.pick('blue')}>
-                <Text style={styles.colourPickerText}> Blue </Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.colourPicker, {backgroundColor: 'green', marginRight: 1}]} onPress={() => this.pick('green')}>
-                <Text style={styles.colourPickerText}> Green </Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.colourPicker, {backgroundColor: 'yellow', marginRight: 1}]} onPress={() => this.pick('yellow')}>
-                <Text style={styles.colourPickerText}> Yellow </Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.colourPicker, {backgroundColor: 'black', marginRight: 1}]} onPress={() => this.pick('black')}>
-                <Text style={styles.colourPickerText}> Black </Text>
+            <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 20}}>
+              <TouchableOpacity style={{backgroundColor: 'antiquewhite', alignItems: 'center', width: 150}}> 
+                <Text style={[styles.colourPickerText, {color: 'black'}]} onPress={() => this.setCustomFont()}> Font </Text>
               </TouchableOpacity>
             </View>
             <View style={{flexDirection: 'row', justifyContent: 'center', marginTop: 20}}>
-              <TouchableOpacity style={[styles.colourPicker, {backgroundColor: 'antiquewhite'}]}> 
-                <Text style={[styles.colourPickerText, {color: 'black'}]} onPress={() => this.setCustom()}> Custom </Text>
-              </TouchableOpacity>
-            </View>
-            <View style={{marginTop: 50, flexDirection: 'row', justifyContent: 'center',}}>
-              <TouchableOpacity style={{backgroundColor: 'antiquewhite', alignItems: 'center', width: 150}} onPress={() => this.firstStartUpOver(SETUP_KEY, false)}> 
-                <Text style={[styles.colourPickerText, {color: 'black'}]}> Confirm </Text>
+              <TouchableOpacity style={{backgroundColor: 'antiquewhite', alignItems: 'center', width: 150}}> 
+                <Text style={[styles.colourPickerText, {color: 'black'}]} onPress={() => this.setCustomBg()}> Background </Text>
               </TouchableOpacity>
             </View>
             <View style={{marginTop: 20, flexDirection: 'row', justifyContent: 'center',}}>
-              <TouchableOpacity style={{backgroundColor: 'antiquewhite', alignItems: 'center', width: 150}} onPress={() => this.reset()}> 
-                <Text style={[styles.colourPickerText, {color: 'black'}]}> Reset </Text>
+              <TouchableOpacity style={{backgroundColor: 'antiquewhite', alignItems: 'center', width: 150}} onPress={() => this.firstStartUpOver(SETUP_KEY, false)}> 
+                <Text style={[styles.colourPickerText, {color: 'black'}]}> Confirm </Text>
               </TouchableOpacity>
             </View>
             <View style={{marginTop: 20, flexDirection: 'row', justifyContent: 'center',}}>
@@ -380,7 +437,7 @@ export default class CalculatorScreen extends React.Component {
         return(
           <View style={[styles.container, {backgroundColor: this.state.colour_bg}]}>
             <View style={styles.buttonRow}>
-            <CalcButton style={{ marginTop: 50, flex:4}} onPress={() => this.firstStartUpOver(SETUP_KEY, true)} title="Reset" backgroundColor={this.state.colour_one} color={this.state.font_colour}/>
+            <CalcButton style={{ marginTop: 50, flex:4}} onPress={() => this.firstStartUpOver(SETUP_KEY, true)} title="Re-customise" backgroundColor={this.state.colour_one} color={this.state.font_colour}/>
             </View>
             <View style={styles.displayContainer} {...this.panResponder.panHandlers}>
               <CalcDisplay display={this.state.display}/>
