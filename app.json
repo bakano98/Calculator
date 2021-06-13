@@ -2,7 +2,7 @@
   "expo": {
     "name": "Calculator",
     "slug": "Calculator",
-    "version": "1.0.2",
+    "version": "2.0",
     "icon": "./assets/calculator.png",
     "splash": {
       "image": "./assets/calculator.png",
@@ -24,7 +24,7 @@
         "backgroundColor": "#FFFFFF"
       },
       "permissions": [],
-      "versionCode": 2,
+      "versionCode": 3,
       "package": "com.bakano.Calculator"
     },
     "web": {
